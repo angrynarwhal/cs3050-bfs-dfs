@@ -1,92 +1,89 @@
-from collections import deque
+import networkx as nx
+import matplotlib.pyplot as plt
 
 class Graph:
-    def __init__(self, directed=False):
+    def __init__(self, directed=True):
         self.directed = directed
         self.adj_list = {}
+        self.edge_list = []
 
     def add_edge(self, u, v, weight=1):
+        self.edge_list.append((u, v, weight))
         if u not in self.adj_list:
             self.adj_list[u] = []
         self.adj_list[u].append((v, weight))
-        if not self.directed:
-            if v not in self.adj_list:
-                self.adj_list[v] = []
-            self.adj_list[v].append((u, weight))
+        if v not in self.adj_list:
+            self.adj_list[v] = []
 
-    def __str__(self):
-        out = ["Graph (Directed)" if self.directed else "Graph (Undirected)"]
-        for u in sorted(self.adj_list):
-            edges = ", ".join([f"{u}->{v} ({w})" for v, w in self.adj_list[u]])
-            out.append(f"{edges}")
-        return "\n".join(out)
+    @staticmethod
+    def from_file(file_path):
+        graph = Graph(directed=True)
+        with open(file_path, 'r') as f:
+            for line in f:
+                u, v, w = map(float, line.strip().split())
+                graph.add_edge(int(u), int(v), w)
+        return graph
 
-def bfs(graph, start):
-    visited = set()
-    distance = {start: 0}
-    queue = deque([start])
+def save_graph(G, distances, title="Graph", filename="step.png", current=None, highlight_edges=None, changed_nodes=None):
+    pos = nx.shell_layout(G)
+    node_labels = {node: f"{node}\n{distances.get(node, '∞')}" for node in G.nodes()}
+    edge_labels = nx.get_edge_attributes(G, 'weight')
+    node_colors = []
 
-    while queue:
-        node = queue.popleft()
-        print(f"{node}({distance[node]})", end=" ")
+    for node in G.nodes():
+        if changed_nodes and node in changed_nodes:
+            node_colors.append("yellow")  # Changed nodes during relaxation
+        elif node in distances and distances[node] < float('inf'):
+            node_colors.append("lightblue")  # Visited nodes
+        else:
+            node_colors.append("white")  # Unvisited nodes
 
-        for neighbor, _ in graph.adj_list.get(node, []):
-            if neighbor not in visited and neighbor not in queue:
-                distance[neighbor] = distance[node] + 1
-                queue.append(neighbor)
-        
-        visited.add(node)
-    print()  # newline for clean output
+    plt.figure(figsize=(8, 6))
+    nx.draw(G, pos, with_labels=True, labels=node_labels,
+            node_color=node_colors, edgecolors="black",
+            node_size=2000, font_size=10)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+    if highlight_edges:
+        nx.draw_networkx_edges(G, pos, edgelist=highlight_edges, edge_color="green", width=2)
+    plt.title(title)
+    plt.savefig(filename)
+    plt.close()
 
-def dfs(graph, start):
-    visited = set()
-    finish_time = {}
-    time = [0]  # Mutable object to track time
+def visualize_graph_construction(graph):
+    G = nx.DiGraph()
+    distances = {}
+    for i, (u, v, w) in enumerate(graph.edge_list, 1):
+        G.add_edge(u, v, weight=w)
+        distances[u] = distances.get(u, float('inf'))
+        distances[v] = distances.get(v, float('inf'))
+        save_graph(G, distances, title=f"Graph Construction Step {i}", filename=f"graph_build_step_{i}.png", highlight_edges=[(u, v)])
 
-    def dfs_visit(node):
-        visited.add(node)
-        for neighbor, _ in graph.adj_list.get(node, []):
-            if neighbor not in visited:
-                dfs_visit(neighbor)
-        time[0] += 1
-        finish_time[node] = time[0]
+def bellman_ford_with_visuals(graph, start):
+    distances = {node: float('inf') for node in graph.adj_list}
+    distances[start] = 0
+    G = nx.DiGraph()
+    for u, v, w in graph.edge_list:
+        G.add_edge(u, v, weight=w)
 
-    # Start DFS from node 1 if unspecified
-    dfs_visit(start)
+    step = 1
+    for _ in range(len(graph.adj_list) - 1):
+        updated = False
+        changed_nodes = set()
+        for u in graph.adj_list:
+            for v, w in graph.adj_list[u]:
+                if distances[u] + w < distances[v]:
+                    distances[v] = distances[u] + w
+                    updated = True
+                    changed_nodes.add(v)
+        save_graph(G, distances, title=f"Relaxation Step {step}", filename=f"relax_step_{step}.png", changed_nodes=changed_nodes)
+        step += 1
+        if not updated:
+            break
 
-    # Output: sort nodes by finish time descending (like in the example)
-    for node, f_time in sorted(finish_time.items(), key=lambda x: -x[1]):
-        print(f"{node}({f_time})", end=" ")
-    print()
-
-g = Graph(directed=False)
-g.add_edge(1, 2, 0.5)
-g.add_edge(2, 3, 2.2)
-print(g)
-print("BFS from node 1:")
-bfs(g, 1)
-print("DFS from node 1:")
-dfs(g, 1)
-
-def parse_graph_from_input(lines):
-    directed = bool(int(lines[0].strip()))
-    start_node = int(lines[1].strip())
-    num_nodes = int(lines[2].strip())
-    num_edges = int(lines[3].strip())
-    g = Graph(directed=directed)
-
-    for line in lines[4:4 + num_edges]:
-        u, v, w = line.strip().split()
-        g.add_edge(int(u), int(v), float(w))
-    return g, start_node
+def run_combined_visualization(input_file, start_node=1):
+    graph = Graph.from_file(input_file)
+    visualize_graph_construction(graph)
+    bellman_ford_with_visuals(graph, start_node)
 
 if __name__ == "__main__":
-    import sys
-    lines = sys.stdin.read().strip().split("\n")
-    graph, start_node = parse_graph_from_input(lines)
-
-    print(graph)
-    print("\nBFS:")
-    bfs(graph, start_node)
-    print("\nDFS:")
-    dfs(graph, 1)  # DFS always starts at node 1
+    run_combined_visualization("graph_input.txt", start_node=1)
