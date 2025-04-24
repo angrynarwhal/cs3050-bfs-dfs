@@ -1,5 +1,5 @@
 # cs3050-bfs-dfs
-Pythonic Example of breadth first and depth first search
+Pythonic Example of breadth first and depth first search. Also demonstrating negative edge weights and relaxation. Ultimately builds an imperfect but useful powerpoint presentation. 
 
 ## Setting up Environment: 
 - The first several programs do not require any libraries. 
@@ -15,7 +15,7 @@ Pythonic Example of breadth first and depth first search
  - Implement BFS, showing node discovery order and distances.
  - Implement DFS, showing discovery and finish times.
  - Apply both algorithms to network-like graphs (small-world structures, grid networks).
- 
+
 2.	Progressive Examples:
  - Example 1: Simple undirected graph (3-4 nodes).
  - Example 2: Directed graph (5-6 nodes).
