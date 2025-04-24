@@ -75,7 +75,7 @@ def dfs_with_save(graph, start):
 # Example usage
 if __name__ == "__main__":
     g = Graph(directed=False)
-    edges = [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 9)]
+    edges = [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (1,3), (2,4), (2,7), (3,8), (3,9), (1,6), (6, 7), (7, 8), (8, 9)]
     for u, v in edges:
         g.add_edge(u, v)
 
