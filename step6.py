@@ -1,3 +1,5 @@
+import networkx as nx
+import matplotlib.pyplot as plt
 from collections import deque
 
 class Graph:
@@ -14,79 +16,68 @@ class Graph:
                 self.adj_list[v] = []
             self.adj_list[v].append((u, weight))
 
-    def __str__(self):
-        out = ["Graph (Directed)" if self.directed else "Graph (Undirected)"]
-        for u in sorted(self.adj_list):
-            edges = ", ".join([f"{u}->{v} ({w})" for v, w in self.adj_list[u]])
-            out.append(f"{edges}")
-        return "\n".join(out)
+def save_graph_step(adj_list, visited, current=None, title="Graph Step", filename="step.png"):
+    G = nx.Graph()
+    for u in adj_list:
+        for v, _ in adj_list[u]:
+            G.add_edge(u, v)
 
-def bfs(graph, start):
+    pos = nx.spring_layout(G, seed=42)  # consistent layout
+    node_colors = []
+    for node in G.nodes():
+        if node == current:
+            node_colors.append("red")          # current node
+        elif node in visited:
+            node_colors.append("lightblue")    # visited nodes
+        else:
+            node_colors.append("white")        # unvisited nodes
+
+    plt.figure()
+    nx.draw(G, pos, with_labels=True, node_color=node_colors, edgecolors="black")
+    plt.title(title)
+    plt.savefig(filename)
+    plt.close()
+
+def bfs_with_save(graph, start):
     visited = set()
     distance = {start: 0}
     queue = deque([start])
 
+    step = 1
     while queue:
         node = queue.popleft()
-        print(f"{node}({distance[node]})", end=" ")
+        save_graph_step(graph.adj_list, visited, current=node, title=f"BFS Step {step}", filename=f"bfs_step_{step}.png")
+        step += 1
 
         for neighbor, _ in graph.adj_list.get(node, []):
             if neighbor not in visited and neighbor not in queue:
                 distance[neighbor] = distance[node] + 1
                 queue.append(neighbor)
-        
         visited.add(node)
-    print()  # newline for clean output
 
-def dfs(graph, start):
+def dfs_with_save(graph, start):
     visited = set()
     finish_time = {}
-    time = [0]  # Mutable object to track time
+    time = [0]
 
-    def dfs_visit(node):
+    def dfs_visit(node, step):
+        save_graph_step(graph.adj_list, visited, current=node, title=f"DFS Step {step}", filename=f"dfs_step_{step}.png")
         visited.add(node)
         for neighbor, _ in graph.adj_list.get(node, []):
             if neighbor not in visited:
-                dfs_visit(neighbor)
+                step = dfs_visit(neighbor, step + 1)
         time[0] += 1
         finish_time[node] = time[0]
+        return step
 
-    # Start DFS from node 1 if unspecified
-    dfs_visit(start)
+    dfs_visit(start, 1)
 
-    # Output: sort nodes by finish time descending (like in the example)
-    for node, f_time in sorted(finish_time.items(), key=lambda x: -x[1]):
-        print(f"{node}({f_time})", end=" ")
-    print()
-
-g = Graph(directed=False)
-g.add_edge(1, 2, 0.5)
-g.add_edge(2, 3, 2.2)
-print(g)
-print("BFS from node 1:")
-bfs(g, 1)
-print("DFS from node 1:")
-dfs(g, 1)
-
-def parse_graph_from_input(lines):
-    directed = bool(int(lines[0].strip()))
-    start_node = int(lines[1].strip())
-    num_nodes = int(lines[2].strip())
-    num_edges = int(lines[3].strip())
-    g = Graph(directed=directed)
-
-    for line in lines[4:4 + num_edges]:
-        u, v, w = line.strip().split()
-        g.add_edge(int(u), int(v), float(w))
-    return g, start_node
-
+# Example usage
 if __name__ == "__main__":
-    import sys
-    lines = sys.stdin.read().strip().split("\n")
-    graph, start_node = parse_graph_from_input(lines)
+    g = Graph(directed=False)
+    edges = [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (1,3), (2,4), (2,7), (3,8), (3,9), (1,6), (6, 7), (7, 8), (8, 9)]
+    for u, v in edges:
+        g.add_edge(u, v)
 
-    print(graph)
-    print("\nBFS:")
-    bfs(graph, start_node)
-    print("\nDFS:")
-    dfs(graph, 1)  # DFS always starts at node 1
+    bfs_with_save(g, 1)
+    dfs_with_save(g, 1)
