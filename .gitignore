@@ -1,6 +1,10 @@
-#
+# Stupid Dropbox Crap
 .DS_Store
 *.DS_Store
+
+# Generated images
+*.png
+.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
