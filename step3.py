@@ -38,6 +38,14 @@ def bfs(graph, start):
         visited.add(node)
     print()  # newline for clean output
 
+"""
+        1 -- 2
+        |     \
+        3      4 -- 5
+        \____/
+
+"""
+
 def dfs(graph, start):
     visited = set()
     finish_time = {}
@@ -58,3 +66,23 @@ def dfs(graph, start):
     for node, f_time in sorted(finish_time.items(), key=lambda x: -x[1]):
         print(f"{node}({f_time})", end=" ")
     print()
+    
+if __name__ == "__main__":
+    g = Graph(directed=False)
+
+    # Define the same graph structure
+    g.add_edge(1, 2, 1.0)
+    g.add_edge(1, 3, 1.0)
+    g.add_edge(2, 4, 1.0)
+    g.add_edge(3, 4, 1.0)
+    g.add_edge(4, 5, 1.0)
+
+    print(g)
+    
+    # BFS Demonstration
+    print("\nBFS from node 1:")
+    bfs(g, 1)
+
+    # DFS Demonstration
+    print("\nDFS from node 1:")
+    dfs(g, 1)

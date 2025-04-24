@@ -37,3 +37,17 @@ def bfs(graph, start):
         
         visited.add(node)
     print()  # newline for clean output
+
+if __name__ == "__main__":
+    g = Graph(directed=False)
+
+    # Add edges: small but meaningful graph
+    g.add_edge(1, 2, 1.0)
+    g.add_edge(1, 3, 1.0)
+    g.add_edge(2, 4, 1.0)
+    g.add_edge(3, 4, 1.0)
+    g.add_edge(4, 5, 1.0)
+
+    print(g)
+    print("\nBFS from node 1:")
+    bfs(g, 1)
