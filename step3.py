@@ -81,8 +81,8 @@ if __name__ == "__main__":
     
     # BFS Demonstration
     print("\nBFS from node 1:")
-    bfs(g, 1)
+    bfs(g, 3)
 
     # DFS Demonstration
     print("\nDFS from node 1:")
-    dfs(g, 1)
+    dfs(g, 3)
