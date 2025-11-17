@@ -19,7 +19,7 @@ class Graph:
         for u in sorted(self.adj_list):
             edges = ", ".join([f"{u}->{v} ({w})" for v, w in self.adj_list[u]])
             out.append(f"{edges}")
-        return "\n".join(out)
+        return "".join(out)
 
 def bfs(graph, start):
     visited = set()
@@ -80,9 +80,9 @@ if __name__ == "__main__":
     print(g)
     
     # BFS Demonstration
-    print("\nBFS from node 1:")
+    print("BFS from node 1:")
     bfs(g, 3)
 
     # DFS Demonstration
-    print("\nDFS from node 1:")
+    print("DFS from node 1:")
     dfs(g, 3)
