@@ -9,6 +9,8 @@ Pythonic Example of breadth first and depth first search. Also demonstrating neg
     - `pip install -r requirements.txt`
 
 # Conceptual Steps Followed by the Programs (Maybe not perfectly; These are Pre-Code Notes): 
+0. If you run all 9 python programs, you will generate the powerpoint file included in this repository, along with the `.png` files used to assemble the powerpoint. 
+
 1.	Step-by-step buildup:
  - Start with graph construction from the provided input format.
  - Visualize simple graph examples to introduce nodes and edges.
